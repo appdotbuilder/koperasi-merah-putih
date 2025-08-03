@@ -1,16 +1,25 @@
 
+import { db } from '../db';
+import { notificationsTable } from '../db/schema';
 import { type CreateNotificationInput, type Notification } from '../schema';
 
-export async function createNotification(input: CreateNotificationInput): Promise<Notification> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating notifications for members.
-    return Promise.resolve({
-        id: 0,
+export const createNotification = async (input: CreateNotificationInput): Promise<Notification> => {
+  try {
+    // Insert notification record
+    const result = await db.insert(notificationsTable)
+      .values({
         user_id: input.user_id,
         type: input.type,
         title: input.title,
-        message: input.message,
-        read: false,
-        created_at: new Date()
-    } as Notification);
-}
+        message: input.message
+      })
+      .returning()
+      .execute();
+
+    const notification = result[0];
+    return notification;
+  } catch (error) {
+    console.error('Notification creation failed:', error);
+    throw error;
+  }
+};
